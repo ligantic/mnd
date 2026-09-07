@@ -6762,7 +6762,7 @@ context_form_groups:
   - subsequentVisit
   is_default: false
   name: Subsequent Specialist Clinic Visits
-  naming_cde_to_use: subsequentVisit/mndPatientInformation/mndVDate
+  naming_cde_to_use: subsequentVisit/mndPatientInformationSV/mndVDate
   naming_scheme: C
   ordering: C
   sort_order: 10
