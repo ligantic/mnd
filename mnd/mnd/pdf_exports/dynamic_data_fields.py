@@ -30,6 +30,17 @@ def _get_form_values(dyn_data):
     return form_values
 
 
+def _merge_form_values(form_values, new_form_values):
+    for key, value in new_form_values.items():
+        current_value = form_values.get(key)
+        if (
+            key not in form_values
+            or current_value in (None, "", 0, "0")
+            or value not in (None, "", 0, "0")
+        ):
+            form_values[key] = value
+
+
 def generate_dynamic_data_fields(registry, patient):
     form_values = {}
     max_ts = None
@@ -46,7 +57,7 @@ def generate_dynamic_data_fields(registry, patient):
                 max_ts = as_dt
             elif as_dt > max_ts:
                 max_ts = as_dt
-        form_values.update(_get_form_values(dyn_data))
+        _merge_form_values(form_values, _get_form_values(dyn_data))
 
     cde_codes = [code for (__, __, code, __) in form_values.keys()]
     fvr = FormValueResolver(cde_codes)

@@ -123,6 +123,7 @@ _single_section_field_mappings = {
     # First visit
     ("firstVisit", "DxDetails", "MNDDiagnosis"): "mndType",
     ("firstVisit", "mndPresentingDetails", "mndDateConfirm"): "mndDiagDate",
+    ("firstVisit", "mndImported1a", "mndDateConfirm"): "mndDiagDate",
 }
 
 # key is (section_code, cde_code), value is pdf form element base (and index is appended..usually from 1 to 9)

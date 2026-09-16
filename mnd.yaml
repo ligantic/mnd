@@ -7149,7 +7149,7 @@ forms:
     feedTubeDate visible if mndDMode7 includes "Feeding Tube"
     trachDeathDate visible if mndDMode7 includes Tracheostomy
     mndVADutilised visible if mndVADaccess == "Yes"
-  display_name: Completion From
+  display_name: Completion Form
   header: |-
     <h1>Completion CRF</h1>
     <p>PDF version of this form can be
