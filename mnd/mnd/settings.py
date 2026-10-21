@@ -28,7 +28,7 @@ PROJECT_LOGO = env.get("project_logo", "images/mnd/MiND_Logo_orange.png")
 
 VERSION = env.get("app_version", "%s (mnd)" % mnd.VERSION)
 
-CURATOR_EMAIL = env.get("curator_email", "catherine.hansen@deakin.edu.au")
+CURATOR_EMAIL = env.get("curator_email", "mindaus@mndaustralia.org.au")
 
 PDF_TEMPLATES_PATH = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/mnd/templates/pdf_export"
 
