@@ -6484,7 +6484,7 @@ consent_rules:
 consent_sections:
 - applicability_condition: ''
   code: 1ReadPDF
-  information_link: MiNDAUS_Clinical_Reg_National_PICF_template_v1.2.pdf
+  information_link: MiNDAUS_Clinical_Reg_National_PICF_template_v2.1.pdf
   information_text: |-
     <h3> <b>Please tick 'Consent to All' to agree to all statements outlined in the Participant information sheet. Alternatively, you can tick each individual box you agree with below</b> </h3>
     </br>
