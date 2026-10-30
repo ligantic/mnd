@@ -1,4 +1,5 @@
 import pycountry
+from django.conf import settings
 from django.db import models
 from django.db.models import Subquery
 from django.dispatch import receiver
@@ -13,6 +14,29 @@ LANGUAGE_CHOICES = [
     for lang in pycountry.languages
     if hasattr(lang, "alpha_2")
 ]
+
+
+class RegistrationConsent(models.Model):
+    WORDING = _(
+        "I have read the Participant Information Sheet and agree to register "
+        "with the MiNDAUS Registry and to the collection and storage of the "
+        "information I provide for registration. I understand that any "
+        "additional research or contact permissions will be requested separately."
+    )
+    INFORMATION_SHEET = (
+        "docs/MiNDAUS_Clinical_Reg_National_PICF_template_v2.1.pdf"
+    )
+
+    patient = models.OneToOneField(
+        Patient, on_delete=models.CASCADE, related_name="registration_consent"
+    )
+    accepted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
+    accepted_at = models.DateTimeField(auto_now_add=True)
+    wording = models.TextField()
+    information_sheet = models.CharField(max_length=255)
+    language = models.CharField(max_length=20)
 
 
 class PatientInsurance(models.Model):

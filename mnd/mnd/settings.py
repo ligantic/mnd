@@ -23,8 +23,8 @@ PROJECT_TITLE_LINK = "login_router"
 
 PROJECT_LOGO = env.get("project_logo", "images/mnd/MiNDAUS-Registry-Logo.png")
 
-# Registration customisation (if any) goes here
-# REGISTRATION_CLASS = "mnd.custom_registration.CustomRegistration"
+REGISTRATION_FORM = "mnd.forms.mnd_registration_form.MNDRegistrationForm"
+REGISTRATION_CLASS = "mnd.registry.groups.registration.mnd_registration.MNDRegistration"
 
 VERSION = env.get("app_version", "%s (mnd)" % mnd.VERSION)
 
@@ -34,11 +34,6 @@ PDF_TEMPLATES_PATH = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__
 
 # Content Security Policy
 CSP_CHILD_SRC = ["'self'", "https://www.youtube.com"]
-
-# Currently using registration from base TRRF as-is, but keeping these for future reference
-#
-# REGISTRATION_FORM = 'mnd.forms.mnd_registration_form.MNDRegistrationForm'
-# REGISTRATION_CLASS = 'mnd.registry.groups.registration.mnd_registration.MNDRegistration'
 
 STRONGHOLD_PUBLIC_URLS += (r"/(?P<registry_code>\w+)/carer_registration/?$",)
 

@@ -1,0 +1,105 @@
+{% extends "registration/registration_base.html" %}
+{% load i18n static project_title recaptcha_site_key %}
+
+{% block form_instructions %}
+    <h3 class="pb-2">{% project_title %} - {% trans "Patient Registration" %}</h3>
+    <div class="alert alert-info">
+        {% trans "You must have a confirmed diagnosis of motor neurone disease (MND) to register with the MiNDAUS Registry." %}
+    </div>
+{% endblock %}
+
+{% block extra_js_init %}
+    $("#id_date_of_birth, #id_parent_guardian_date_of_birth").datepicker(dateOptions);
+
+    function updateGuardianDetails() {
+        var selected = $("#id_has_guardian").prop("checked");
+        $("#guardian-details").toggle(selected).prop("disabled", !selected);
+        $("#guardian-details [data-required-guardian]").prop("required", selected);
+        $("#guardian-details label .guardian-required").toggle(selected);
+    }
+
+    $("#guardian-details [data-required-guardian]").each(function() {
+        var label = $('label[for="' + this.id + '"]');
+        if (!label.find(".required").length) {
+            label.append('<span class="required guardian-required text-secondary ps-1">*</span>');
+        }
+    });
+    $("#id_has_guardian").on("change", updateGuardianDetails);
+    updateGuardianDetails();
+
+    $("#id_country, #id_parent_guardian_country").on("change", function() {
+        var state = $("#" + this.id.replace("country", "state"));
+        var error = state.siblings(".state-lookup-error");
+        var country = this.value;
+        state.data("country", country).empty().append($("<option>", {value: "", text: "---------"}));
+        error.remove();
+        if (!country) {
+            return;
+        }
+        $.getJSON("{% url 'v1:state_lookup' 'XX' %}".replace("XX", country))
+            .done(function(data) {
+                if (state.data("country") !== country) {
+                    return;
+                }
+                $.each(data, function(index, region) {
+                    state.append($("<option>", {value: region.code, text: region.name}));
+                });
+            })
+            .fail(function() {
+                if (state.data("country") === country) {
+                    $("<div>", {class: "state-lookup-error error", role: "alert"})
+                        .text(gettext("Unable to load regions. Please select your country again to retry."))
+                        .insertAfter(state);
+                }
+            });
+    });
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    {% csrf_token %}
+    <input type="hidden" name="registry_code" value="{{ registry_code }}">
+    <input id="id_email" name="email" type="hidden">
+    <div class="row">
+        <div class="col-lg-6">
+            {% include "registration/registration_login_details.html" %}
+        </div>
+        <div class="col-lg-6 mt-4 mt-lg-0">
+            {% include "registration/registration_patient_details.html" with contact_fields=form.contact_fields %}
+            <div class="border bg-light p-3 mt-4">
+                <div class="form-check">
+                    {{ form.has_guardian }}
+                    <label class="form-check-label" for="{{ form.has_guardian.id_for_label }}">{{ form.has_guardian.label }}</label>
+                </div>
+                <p class="form-text">{% trans "Guardian details are optional. Adding them does not create a guardian account or give the guardian access to the registry. The login remains the patient's account." %}</p>
+                <fieldset id="guardian-details">
+                    <legend>{% trans "Guardian Details" %}</legend>
+                    <p class="form-text">{% trans "If adding a guardian, provide their name and contact details. Date of birth and gender are optional." %}</p>
+                    <div class="row g-3">
+                        {% for field in form.guardian_fields %}
+                            {% include "registration/mnd_registration_field.html" with guardian=True %}
+                        {% endfor %}
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+    <fieldset class="border bg-light p-3 mt-4">
+        <legend>{% trans "Consent to Registration" %}</legend>
+        <p><a href="{% static form.registration_consent_information_sheet %}" target="_blank" rel="noopener">{% trans "Read the Participant Information Sheet and Consent Form (version 2.1)" %}</a></p>
+        <div class="form-check">
+            {{ form.registration_consent }}
+            <label class="form-check-label" for="{{ form.registration_consent.id_for_label }}">{{ form.registration_consent.label }}</label>
+            {{ form.registration_consent.errors }}
+        </div>
+        <p class="form-text">{% trans "This records consent to registration only. You will still be asked to complete the registry's detailed participation consent." %}</p>
+    </fieldset>
+    <div class="row mt-4 mb-4 g-3">
+        <div class="col-lg-6">
+            <div class="g-recaptcha" data-sitekey="{% recaptcha_site_key %}" data-callback="reCaptchaCallback" data-expired-callback="reCaptchaExpiredCallback"></div>
+        </div>
+        <div class="col-lg-6">
+            <button type="button" id="registration-submit" class="btn btn-success float-end">{% trans "Submit" %}</button>
+        </div>
+    </div>
+{% endblock %}

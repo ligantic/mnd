@@ -2,7 +2,34 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from mnd.models import DuplicatePatient, MIMSCMICache, MIMSProductCache
+from mnd.models import (
+    DuplicatePatient,
+    MIMSCMICache,
+    MIMSProductCache,
+    RegistrationConsent,
+)
+
+
+@admin.register(RegistrationConsent)
+class RegistrationConsentAdmin(admin.ModelAdmin):
+    list_display = ("patient", "accepted_at", "accepted_by", "language")
+    readonly_fields = (
+        "patient",
+        "accepted_by",
+        "accepted_at",
+        "wording",
+        "information_sheet",
+        "language",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class DuplicatePatientAdmin(admin.ModelAdmin):

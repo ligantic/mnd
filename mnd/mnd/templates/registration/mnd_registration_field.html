@@ -1,0 +1,18 @@
+{% load i18n %}
+<div class="col-12">
+    {% if field.widget_type == "radioselect" %}
+        <fieldset class="radio-group">
+            <legend class="h6">{{ field.label }}</legend>
+            {% for choice in field %}
+                <div class="form-check form-check-inline p-0">
+                    <label>{{ choice.tag }} {{ choice.choice_label }}</label>
+                </div>
+            {% endfor %}
+            <div class="form-text">{% trans "Indeterminate also refers to Intersex/Unspecified" %}</div>
+        </fieldset>
+    {% else %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+    {% endif %}
+    {{ field.errors }}
+</div>

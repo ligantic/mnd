@@ -1,7 +1,8 @@
 import logging
 
 from django.utils import timezone
-from mnd.models import CarerRegistration
+from django.utils.translation import get_language
+from mnd.models import CarerRegistration, RegistrationConsent
 from rdrf.events.events import EventType
 from rdrf.services.io.notifications.email_notification import (
     process_notification,
@@ -9,8 +10,69 @@ from rdrf.services.io.notifications.email_notification import (
 from registration.models import RegistrationProfile
 from registry.groups import GROUPS
 from registry.groups.registration.base import BaseRegistration
+from registry.groups.registration.patient import PatientRegistration
+from registry.patients.models import AddressType, ParentGuardian, PatientAddress
 
 logger = logging.getLogger(__name__)
+
+
+class MNDRegistration(PatientRegistration):
+    def get_template_name(self):
+        return "registration/mnd_registration_form.html"
+
+    def _create_patient(
+        self, registry, working_group, user, set_link_to_user=True
+    ):
+        patient = super()._create_patient(
+            registry, working_group, user, set_link_to_user=set_link_to_user
+        )
+        data = self.form.cleaned_data
+        patient.home_phone = data["phone_number"]
+        patient.save(update_fields=["home_phone"])
+        address_type, _ = AddressType.objects.get_or_create(type="Postal")
+        PatientAddress.objects.create(
+            patient=patient,
+            address_type=address_type,
+            **{
+                name: data[name]
+                for name in (
+                    "address",
+                    "suburb",
+                    "country",
+                    "state",
+                    "postcode",
+                )
+            },
+        )
+        if data["has_guardian"]:
+            guardian = ParentGuardian.objects.create(
+                **{
+                    name: data[f"parent_guardian_{name}"]
+                    for name in (
+                        "first_name",
+                        "last_name",
+                        "phone",
+                        "date_of_birth",
+                        "gender",
+                        "address",
+                        "suburb",
+                        "state",
+                        "postcode",
+                        "country",
+                    )
+                }
+            )
+            guardian.patient.add(patient)
+        if not data["registration_consent"]:
+            raise ValueError("Registration consent is required")
+        RegistrationConsent.objects.create(
+            patient=patient,
+            accepted_by=user,
+            wording=str(self.form.fields["registration_consent"].label),
+            information_sheet=RegistrationConsent.INFORMATION_SHEET,
+            language=get_language(),
+        )
+        return patient
 
 
 class MNDCarerRegistration(BaseRegistration):
